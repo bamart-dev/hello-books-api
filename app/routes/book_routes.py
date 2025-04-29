@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, make_response, request
+from flask import Blueprint, abort, make_response, request, Response
 from app.models.book import Book
 from app.db import db
 
@@ -45,6 +45,28 @@ def get_one_book(book_id):
         "title": book.title,
         "description": book.description,
     }
+
+
+@books_bp.put("/<book_id>")
+def update_book(book_id):
+    book = validate_book(book_id)
+    request_body = request.get_json()
+
+    book.title = request_body["title"]
+    book.description = request_body["description"]
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+
+@books_bp.delete("/<book_id>")
+def delete_book(book_id):
+    book = validate_book(book_id)
+
+    db.session.delete(book)
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
 
 
 def validate_book(book_id):
